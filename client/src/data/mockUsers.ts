@@ -1,17 +1,4 @@
-
-export interface TableUsers{
-    users: User[];
-}
-
-export type User = {
-    id: number;
-    userName: string;
-    country: string;
-    position: string;
-    salary: number;
-    department: string;
-    yearsOfService: number;
-}
+import type { User } from "../types/user";
 
 
 
