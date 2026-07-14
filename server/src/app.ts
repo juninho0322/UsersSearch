@@ -2,6 +2,8 @@
 
 import express from "express";
 import cors from "cors";
+import { notFoundMiddleware } from "./middleware/not-found.middleware.js";
+
 
 export const app = express();
 
@@ -27,8 +29,5 @@ app.get("/health", (req, res) => {
 });
 
 //not found middleware
-app.use((req, res) => {
-    res.status(404).json({
-        message: "Route not found"
-    });
-});
+app.use(notFoundMiddleware);
+ 
