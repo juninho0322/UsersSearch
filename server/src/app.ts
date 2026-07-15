@@ -5,6 +5,7 @@ import cors from "cors";
 
 import { apiRouter } from "./routes/index.js";
 import { notFoundMiddleware } from "./middleware/not-found.middleware.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 export const app = express();
 
@@ -34,5 +35,8 @@ app.get("/health", (req, res) => {
     });
 });
 
-//not found middleware
+// 404 after all routes
 app.use(notFoundMiddleware);
+
+// Error middleware must be last
+app.use(errorMiddleware);

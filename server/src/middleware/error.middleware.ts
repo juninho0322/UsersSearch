@@ -1,15 +1,11 @@
 import type { ErrorRequestHandler } from "express";
+import { ZodError } from "zod";
+
 import { AppError } from "../shared/errors/AppError.js";
 import type { ErrorResponse } from "../shared/types/api-response.js";
 
 /*
-    Global error-handling middleware.
-
-    This catches errors passed through Express and converts them into
-    consistent API error responses.
-
-    Expected errors use AppError.
-    Unexpected errors are hidden behind a safe 500 response.
+    Converts application and validation errors into API responses.
 */
 export const errorMiddleware: ErrorRequestHandler = (
     error,
@@ -17,6 +13,19 @@ export const errorMiddleware: ErrorRequestHandler = (
     res,
     _next
 ) => {
+    if (error instanceof ZodError) {
+        const response: ErrorResponse = {
+            error: {
+                message: "Invalid request data",
+                code: "VALIDATION_ERROR",
+                details: error.flatten(),
+            },
+        };
+
+        res.status(400).json(response);
+        return;
+    }
+
     if (error instanceof AppError) {
         const response: ErrorResponse = {
             error: {
