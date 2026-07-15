@@ -2,8 +2,9 @@
 
 import express from "express";
 import cors from "cors";
-import { notFoundMiddleware } from "./middleware/not-found.middleware.js";
 
+import { apiRouter } from "./routes/index.js";
+import { notFoundMiddleware } from "./middleware/not-found.middleware.js";
 
 export const app = express();
 
@@ -13,10 +14,15 @@ app.use(express.json());
 // enable CORS for all routes
 app.use(cors());
 
+// mount the API router at the /api path
+app.use("/api", apiRouter);
+
+// Additional routes for testing and health checks
+
 //test route
 app.get("/", (req, res) => {
     res.json({
-        message: "Hello World!"
+        message: "Hello World!",
     });
 });
 
@@ -30,4 +36,3 @@ app.get("/health", (req, res) => {
 
 //not found middleware
 app.use(notFoundMiddleware);
- 
