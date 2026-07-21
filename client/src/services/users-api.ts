@@ -24,7 +24,8 @@ type ListUsersParams = {
   limit: number;
 };
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+const API_URL =
+  import.meta.env.VITE_API_URL ?? "https://users-search-api.onrender.com";
 
 async function parseError(response: Response): Promise<string> {
   try {

@@ -35,6 +35,12 @@ npm run dev
 The frontend expects:
 
 ```bash
+VITE_API_URL=https://users-search-api.onrender.com
+```
+
+For local backend development, override it with:
+
+```bash
 VITE_API_URL=http://localhost:4000
 ```
 

@@ -79,6 +79,18 @@ VITE_API_URL
 If the env variable is missing, the fallback is:
 
 ```text
+https://users-search-api.onrender.com
+```
+
+For production builds, `client/.env.production` also points the frontend to:
+
+```text
+https://users-search-api.onrender.com
+```
+
+For local backend development, you can override it with:
+
+```text
 http://localhost:4000
 ```
 
