@@ -1,6 +1,8 @@
 # UsersSearch
 
-A full-stack CRUD study project built with React, Vite, Express, TypeScript, Zod, and Supabase.
+UsersSearch is a study full-stack CRUD application built for learning purposes. It demonstrates a React/Vite frontend, an Express/TypeScript API, Zod validation, and Supabase persistence.
+
+This project is not intended to store real private user data. Environment variables in this README are examples only; keep real `.env` files, Supabase service role keys, and any other secrets out of GitHub.
 
 ## Project Structure
 
