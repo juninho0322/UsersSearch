@@ -1,7 +1,7 @@
 import type { User } from "../types/user";
 
 type UserTableHeaderProps = {
-  sortColumn: keyof User | "";
+  sortColumn: keyof User;
   ascending: boolean;
   onSort: (key: keyof User) => void;
 };
@@ -25,13 +25,31 @@ export function UserTableHeader({
     <thead>
       <tr>
         {columns.map((column) => (
-          <th key={column.key} onClick={() => onSort(column.key)}>
-            {column.label}{" "}
-            {sortColumn === column.key && (ascending ? "▼" : "▲")}
+          <th
+            key={column.key}
+            aria-sort={
+              sortColumn === column.key
+                ? ascending
+                  ? "ascending"
+                  : "descending"
+                : "none"
+            }
+          >
+            <button
+              className="sort-button"
+              type="button"
+              onClick={() => onSort(column.key)}
+            >
+              {column.label}
+              {sortColumn === column.key && (
+                <span className="sort-arrow" aria-hidden="true">
+                  {ascending ? "↑" : "↓"}
+                </span>
+              )}
+            </button>
           </th>
         ))}
       </tr>
     </thead>
   );
 }
-

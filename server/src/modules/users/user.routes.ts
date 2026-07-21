@@ -7,7 +7,13 @@
 
 import { Router } from "express";
 
-import { listUsers } from "./user.controller.js";
+import {
+    createUser,
+    deleteUser,
+    getUserById,
+    listUsers,
+    updateUser,
+} from "./user.controller.js";
 
 /*
     Router for all user-related endpoints.
@@ -16,7 +22,25 @@ export const userRouter = Router();
 
 /*
     GET /api/users
-
-    Returns a list of users.
 */
 userRouter.get("/", listUsers);
+
+/*
+    GET /api/users/:id
+*/
+userRouter.get("/:id", getUserById);
+
+/*
+    POST /api/users
+*/
+userRouter.post("/", createUser);
+
+/*
+    PATCH /api/users/:id
+*/
+userRouter.patch("/:id", updateUser);
+
+/*
+    DELETE /api/users/:id
+*/
+userRouter.delete("/:id", deleteUser);

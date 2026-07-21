@@ -1,6 +1,28 @@
-import { describe, expect, it } from "vitest";
-import { listUsers } from "../../src/modules/users/user.service.js";
-import type { ListUsersQuery } from "../../src/modules/users/user.model.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { CreateUserInput, ListUsersQuery, User } from "../../src/modules/users/user.model.js";
+
+const mockListUsersRepository = vi.fn();
+const mockGetUserById = vi.fn();
+const mockCreateUserRepository = vi.fn();
+const mockUpdateUserRepository = vi.fn();
+const mockDeleteUserRepository = vi.fn();
+
+vi.mock("../../src/modules/users/user.repository.js", () => ({
+    listUsers: mockListUsersRepository,
+    getUserById: mockGetUserById,
+    createUser: mockCreateUserRepository,
+    updateUser: mockUpdateUserRepository,
+    deleteUser: mockDeleteUserRepository,
+}));
+
+const {
+    createUser,
+    deleteUser,
+    findUserById,
+    listUsers,
+    updateUser,
+} = await import("../../src/modules/users/user.service.js");
 
 const defaultQuery: ListUsersQuery = {
     sortBy: "id",
@@ -9,124 +31,110 @@ const defaultQuery: ListUsersQuery = {
     limit: 10,
 };
 
-describe("listUsers", () => {
-    it("returns users", () => {
-        const result = listUsers(defaultQuery);
+const user: User = {
+    id: 1,
+    userName: "Luis",
+    country: "Brazil",
+    position: "Frontend Developer",
+    salary: 70000,
+    department: "Engineering",
+    yearsOfService: 3,
+};
 
-        expect(result.data.length).toBeGreaterThan(0);
+const createInput: CreateUserInput = {
+    userName: "Maya",
+    country: "United Kingdom",
+    position: "Product Manager",
+    salary: 82000,
+    department: "Product",
+    yearsOfService: 5,
+};
+
+describe("user service", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    it("searches users by name", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            search: "Luis",
+    it("returns users with pagination metadata", async () => {
+        mockListUsersRepository.mockResolvedValue({
+            users: [user],
+            total: 23,
         });
 
-        expect(result.data.length).toBeGreaterThan(0);
-        expect(
-            result.data.every((user) =>
-                user.userName.toLowerCase().includes("luis")
-            )
-        ).toBe(true);
-    });
+        const result = await listUsers(defaultQuery);
 
-    it("searches users by country", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            search: "Brazil",
-        });
-
-        expect(result.data.length).toBeGreaterThan(0);
-        expect(result.data.some((user) => user.country === "Brazil")).toBe(
-            true
-        );
-    });
-
-    it("sorts users by salary ascending", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            sortBy: "salary",
-            sortOrder: "asc",
-        });
-
-        for (let index = 1; index < result.data.length; index++) {
-            expect(result.data[index - 1].salary).toBeLessThanOrEqual(
-                result.data[index].salary
-            );
-        }
-    });
-
-    it("sorts users by salary descending", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            sortBy: "salary",
-            sortOrder: "desc",
-        });
-
-        for (let index = 1; index < result.data.length; index++) {
-            expect(result.data[index - 1].salary).toBeGreaterThanOrEqual(
-                result.data[index].salary
-            );
-        }
-    });
-
-    it("sorts users by userName ascending", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            sortBy: "userName",
-            sortOrder: "asc",
-        });
-
-        for (let index = 1; index < result.data.length; index++) {
-            const previousName = result.data[index - 1].userName;
-            const currentName = result.data[index].userName;
-
-            expect(previousName.localeCompare(currentName)).toBeLessThanOrEqual(
-                0
-            );
-        }
-    });
-
-    it("returns the correct pagination slice", () => {
-        const firstPage = listUsers({
-            ...defaultQuery,
+        expect(mockListUsersRepository).toHaveBeenCalledWith(defaultQuery);
+        expect(result.data).toEqual([user]);
+        expect(result.meta).toEqual({
             page: 1,
-            limit: 2,
+            limit: 10,
+            total: 23,
+            totalPages: 3,
         });
-
-        const secondPage = listUsers({
-            ...defaultQuery,
-            page: 2,
-            limit: 2,
-        });
-
-        expect(firstPage.data).toHaveLength(2);
-        expect(secondPage.data).toHaveLength(2);
-
-        expect(firstPage.data[0].id).not.toBe(secondPage.data[0].id);
     });
 
-    it("returns correct pagination metadata", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            page: 1,
-            limit: 2,
-        });
+    it("returns one user by id", async () => {
+        mockGetUserById.mockResolvedValue(user);
 
-        expect(result.meta).toBeDefined();
-        expect(result.meta?.page).toBe(1);
-        expect(result.meta?.limit).toBe(2);
-        expect(result.meta?.total).toBeGreaterThan(0);
-        expect(result.meta?.totalPages).toBe(Math.ceil(result.meta!.total / 2));
+        await expect(findUserById(1)).resolves.toEqual(user);
     });
 
-    it("returns an empty array when no users match the search", () => {
-        const result = listUsers({
-            ...defaultQuery,
-            search: "user-that-does-not-exist-12345",
-        });
+    it("throws a 404 when a user does not exist", async () => {
+        mockGetUserById.mockResolvedValue(undefined);
 
-        expect(result.data).toEqual([]);
-        expect(result.meta?.total).toBe(0);
+        await expect(findUserById(999)).rejects.toMatchObject({
+            statusCode: 404,
+            code: "USER_NOT_FOUND",
+        });
+    });
+
+    it("creates a user", async () => {
+        const createdUser = {
+            id: 2,
+            ...createInput,
+        };
+
+        mockCreateUserRepository.mockResolvedValue(createdUser);
+
+        await expect(createUser(createInput)).resolves.toEqual(createdUser);
+        expect(mockCreateUserRepository).toHaveBeenCalledWith(createInput);
+    });
+
+    it("updates a user", async () => {
+        const updatedUser = {
+            ...user,
+            position: "Senior Frontend Developer",
+        };
+
+        mockUpdateUserRepository.mockResolvedValue(updatedUser);
+
+        await expect(
+            updateUser(1, { position: "Senior Frontend Developer" })
+        ).resolves.toEqual(updatedUser);
+    });
+
+    it("throws a 404 when updating a missing user", async () => {
+        mockUpdateUserRepository.mockResolvedValue(undefined);
+
+        await expect(updateUser(999, { country: "Portugal" })).rejects.toMatchObject({
+            statusCode: 404,
+            code: "USER_NOT_FOUND",
+        });
+    });
+
+    it("deletes a user", async () => {
+        mockDeleteUserRepository.mockResolvedValue(user);
+
+        await expect(deleteUser(1)).resolves.toBeUndefined();
+        expect(mockDeleteUserRepository).toHaveBeenCalledWith(1);
+    });
+
+    it("throws a 404 when deleting a missing user", async () => {
+        mockDeleteUserRepository.mockResolvedValue(undefined);
+
+        await expect(deleteUser(999)).rejects.toMatchObject({
+            statusCode: 404,
+            code: "USER_NOT_FOUND",
+        });
     });
 });

@@ -1,14 +1,18 @@
-import dotenv from 'dotenv';
+/*
+    Environment configuration.
 
-// find the .env file in the root directory of the project and load the environment variables
+    Loads and validates the backend environment variables.
+*/
+
+import dotenv from "dotenv";
+import { z } from "zod";
+
 dotenv.config();
 
+const envSchema = z.object({
+    PORT: z.coerce.number().default(4000),
+    SUPABASE_URL: z.string().url(),
+    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+});
 
-if(!process.env.PORT) {
-  throw new Error('PORT is not defined in the environment variables');
-}
-
-// export the environment variables as a single object
-export const env = {
-    PORT: Number(process.env.PORT),
-}
+export const env = envSchema.parse(process.env);

@@ -16,6 +16,9 @@ server/dist/
 # Environment variables
 # ==========================================
 
+client/.env
+client/.env.local
+client/.env.*.local
 server/.env
 
 # ==========================================
@@ -51,8 +54,6 @@ Thumbs.db
 # Readme files
 # ==========================================
 BACKEND_HANDS_ON_README.md
-BACKEND_README.md
 BACKEND_SECOND_STAGE_README.md
-README.md
 client/FRONTEND_README.md
 learning process/to be done/**/*.md

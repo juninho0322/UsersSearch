@@ -37,3 +37,7 @@ export type ListUsersQuery = {
     page: number;
     limit: number;
 };
+
+export type CreateUserInput = Omit<User, "id">;
+
+export type UpdateUserInput = Partial<CreateUserInput>;

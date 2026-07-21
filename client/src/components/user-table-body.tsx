@@ -14,15 +14,22 @@ export function UserTableBody({
 }: UserTableBodyProps) {
   return (
     <tbody>
-      {users.map((user) => (
-        <UserTableRow
-          key={user.id}
-          user={user}
-          isSelected={selectedUserId === user.id}
-          onSelect={onSelectUser}
-        />
-      ))}
+      {users.length === 0 ? (
+        <tr>
+          <td className="empty-table-message" colSpan={7}>
+            No users found.
+          </td>
+        </tr>
+      ) : (
+        users.map((user) => (
+          <UserTableRow
+            key={user.id}
+            user={user}
+            isSelected={selectedUserId === user.id}
+            onSelect={onSelectUser}
+          />
+        ))
+      )}
     </tbody>
   );
 }
-

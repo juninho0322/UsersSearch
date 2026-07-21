@@ -2,12 +2,16 @@ import type { User } from "../types/user";
 
 type DeleteConfirmationModalProps = {
   user: User;
+  errorMessage: string | null;
+  isDeleting: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 };
 
 export function DeleteConfirmationModal({
   user,
+  errorMessage,
+  isDeleting,
   onCancel,
   onConfirm,
 }: DeleteConfirmationModalProps) {
@@ -20,9 +24,10 @@ export function DeleteConfirmationModal({
             className="icon-button"
             type="button"
             onClick={onCancel}
+            disabled={isDeleting}
             aria-label="Close delete confirmation"
           >
-            x
+            &times;
           </button>
         </div>
 
@@ -30,16 +35,22 @@ export function DeleteConfirmationModal({
           Are you sure you want to delete user #{user.id} - {user.userName}?
         </p>
 
+        {errorMessage && <p className="status-message error">{errorMessage}</p>}
+
         <div className="modal-actions">
-          <button type="button" onClick={onCancel}>
+          <button type="button" onClick={onCancel} disabled={isDeleting}>
             No
           </button>
-          <button className="danger-button confirm-button" type="button" onClick={onConfirm}>
-            Yes
+          <button
+            className="danger-button confirm-button"
+            type="button"
+            onClick={onConfirm}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : "Yes"}
           </button>
         </div>
       </div>
     </div>
   );
 }
-
